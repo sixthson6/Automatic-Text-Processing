@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+    <?import javafx.scene.layout.*?>
+    <?import javafx.geometry.Insets?>
+    
+    <BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml"
+                fx:controller="text.processor.controller.MainController">
+        <top>
+            <Label text="Text Processing System"
+                   styleClass="title-label"
+                   BorderPane.alignment="CENTER"/>
+        </top>
+    
+        <center>
+            <GridPane hgap="10" vgap="10" padding="20">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="50"/>
+                    <ColumnConstraints percentWidth="50"/>
+                </columnConstraints>
+    
+                <rowConstraints>
+                    <RowConstraints vgrow="ALWAYS"/>
+                    <RowConstraints vgrow="ALWAYS"/>
+                    <RowConstraints vgrow="NEVER"/>
+                </rowConstraints>
+    
+                <!-- Input Area -->
+                <Label text="Input Text:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextArea fx:id="inputArea" wrapText="true"
+                          GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+    
+                <!-- Output Area -->
+                <Label text="Matched Output:" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <TextArea fx:id="outputArea" editable="false" wrapText="true"
+                          GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    
+                <!-- Regex Input & Button -->
+                <HBox spacing="10" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                    <Label text="Regex Pattern:"/>
+                    <TextField fx:id="regexField" promptText="Enter regex here..." HBox.hgrow="ALWAYS"/>
+                    <Button text="Find Matches" onAction="#onMatchRegex"/>
+                </HBox>
+            </GridPane>
+        </center>
+    
+        <bottom>
+            <Label text="© 2025 DataFlow Solutions"
+                   styleClass="footer-label"
+                   BorderPane.alignment="CENTER"/>
+        </bottom>
+    </BorderPane>
+    
