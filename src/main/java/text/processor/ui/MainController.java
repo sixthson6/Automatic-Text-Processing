@@ -16,11 +16,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import text.processor.TextProcessor;
 import text.processor.service.FileIO;
+import text.processor.service.Regex;
 
 public class MainController {
 
     private final TextProcessor processor = new TextProcessor();
     private final FileIO fileIO = new FileIO();
+    private final Regex regexService = new Regex();
     private final TextArea inputArea = new TextArea();
     private final TextArea resultArea = new TextArea();
     private final TextField regexField = new TextField();
@@ -97,7 +99,7 @@ public class MainController {
     private void findMatches() {
         String input = inputArea.getText();
         String regex = regexField.getText();
-        List<String> matches = processor.findMatches(input, regex);
+        List<String> matches = regexService.findMatches(input, regex);
         resultArea.setText(String.join("\n", matches));
     }
 
@@ -105,7 +107,7 @@ public class MainController {
         String input = inputArea.getText();
         String regex = regexField.getText();
         String replacement = replacementField.getText();
-        String replaced = processor.replaceMatches(input, regex, replacement);
+        String replaced = regexService.replaceMatches(input, regex, replacement);
         resultArea.setText(replaced);
     }
 

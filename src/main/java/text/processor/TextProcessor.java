@@ -2,34 +2,19 @@ package text.processor;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import text.processor.service.FileIO;
+import text.processor.service.Regex;
 
 public class TextProcessor {
     private final FileIO fileIO = new FileIO();
-    // 3. Regex search (returns matched substrings)
-    public List<String> findMatches(String input, String regex) {
-        List<String> matches = new ArrayList<>();
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(input);
-        while (matcher.find()) {
-            matches.add(matcher.group());
-        }
-        return matches;
-    }
-
-    // 4. Regex replace
-    public String replaceMatches(String input, String regex, String replacement) {
-        return input.replaceAll(regex, replacement);
-    }
+    private final Regex regexService = new Regex();
 
     // 5. Word frequency map using Streams
     public Map<String, Long> wordFrequency(String input) {
