@@ -36,10 +36,11 @@ public class MainController {
         Button saveButton = new Button("Save File");
         Button matchButton = new Button("Find Matches");
         Button replaceButton = new Button("Replace");
+        Button highlightButton = new Button("Highlight Matches");
         Button freqButton = new Button("Word Frequency");
         Button summaryButton = new Button("Summarize");
 
-        HBox topPanel = new HBox(10, loadButton, saveButton, matchButton, replaceButton, freqButton, summaryButton);
+        HBox topPanel = new HBox(10, loadButton, saveButton, matchButton, replaceButton, highlightButton, freqButton, summaryButton);
         topPanel.setPadding(new Insets(10));
 
         // Input fields
@@ -61,6 +62,7 @@ public class MainController {
         saveButton.setOnAction(e -> saveFile());
         matchButton.setOnAction(e -> findMatches());
         replaceButton.setOnAction(e -> replaceText());
+        highlightButton.setOnAction(e -> highlightMatches());
         freqButton.setOnAction(e -> showFrequency());
         summaryButton.setOnAction(e -> summarize());
     }
@@ -111,6 +113,13 @@ public class MainController {
         resultArea.setText(replaced);
     }
 
+    private void highlightMatches() {
+        String input = inputArea.getText();
+        String regex = regexField.getText();
+        String highlighted = regexService.highlightMatches(input, regex);
+        resultArea.setText(highlighted);
+    }
+
     private void showFrequency() {
         String input = inputArea.getText();
         Map<String, Long> frequency = processor.wordFrequency(input);
@@ -132,10 +141,4 @@ public class MainController {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
         alert.showAndWait();
     }
-
 }
-
-
-
-
-

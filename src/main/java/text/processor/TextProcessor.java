@@ -10,12 +10,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import text.processor.service.FileIO;
-import text.processor.service.Regex;
 
 public class TextProcessor {
     private final FileIO fileIO = new FileIO();
-    private final Regex regexService = new Regex();
-
     // 5. Word frequency map using Streams
     public Map<String, Long> wordFrequency(String input) {
         return Arrays.stream(input.toLowerCase().split("\\W+"))
