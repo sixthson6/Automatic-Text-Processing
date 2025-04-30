@@ -82,7 +82,7 @@ public class MainController {
             try {
                 List<String> lines = fileIO.readFile(currentFile);
                 inputArea.setText(String.join("\n", lines));
-                logger.info("File loaded: " + currentFile.getAbsolutePath());
+                logger.log(Level.INFO, "File loaded: {0}", currentFile.getAbsolutePath());
             } catch (IOException ex) {
                 logger.log(Level.SEVERE, "Error loading file", ex);
                 showError("Failed to read file: " + ex.getMessage());
@@ -95,7 +95,7 @@ public class MainController {
             try {
                 List<String> lines = List.of(inputArea.getText().split("\n"));
                 fileIO.writeFile(currentFile, lines);
-                logger.info("File saved: " + currentFile.getAbsolutePath());
+                logger.log(Level.INFO, "File saved: {0}", currentFile.getAbsolutePath());
                 showInfo("File saved successfully.");
             } catch (IOException ex) {
                 logger.log(Level.SEVERE, "Error saving file", ex);
@@ -112,7 +112,7 @@ public class MainController {
             String regex = regexField.getText();
             List<String> matches = regexService.findMatches(input, regex);
             resultArea.setText(String.join("\n", matches));
-            logger.info("Regex match performed with pattern: " + regex);
+            logger.log(Level.INFO, "Regex match performed with pattern: {0}", regex);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error during regex match", e);
             showError("Error during matching: " + e.getMessage());
@@ -126,7 +126,7 @@ public class MainController {
             String replacement = replacementField.getText();
             String replaced = regexService.replaceMatches(input, regex, replacement);
             resultArea.setText(replaced);
-            logger.info("Text replaced using pattern: " + regex);
+            logger.log(Level.INFO, "Text replaced using pattern: {0}", regex);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error during text replacement", e);
             showError("Error during replacement: " + e.getMessage());
@@ -139,7 +139,7 @@ public class MainController {
             String regex = regexField.getText();
             String highlighted = regexService.highlightMatches(input, regex);
             resultArea.setText(highlighted);
-            logger.info("Highlight applied with regex: " + regex);
+            logger.log(Level.INFO, "Highlight applied with regex: {0}", regex);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error during highlight", e);
             showError("Error during highlighting: " + e.getMessage());
