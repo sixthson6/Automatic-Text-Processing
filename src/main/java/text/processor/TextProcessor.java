@@ -2,8 +2,6 @@ package text.processor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,18 +11,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import text.processor.service.FileIO;
+
 public class TextProcessor {
-
-    // 1. Read file line by line
-    public List<String> readFile(File file) throws IOException {
-        return Files.readAllLines(file.toPath());
-    }
-
-    // 2. Write lines to a file
-    public void writeFile(File file, List<String> lines) throws IOException {
-        Files.write(file.toPath(), lines, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-    }
-
+    private final FileIO fileIO = new FileIO();
     // 3. Regex search (returns matched substrings)
     public List<String> findMatches(String input, String regex) {
         List<String> matches = new ArrayList<>();
@@ -67,11 +57,11 @@ public class TextProcessor {
     // 8. Batch replace across multiple files
     public void batchReplace(List<File> files, String regex, String replacement) throws IOException {
         for (File file : files) {
-            List<String> lines = readFile(file);
+            List<String> lines = fileIO.readFile(file);
             List<String> updated = lines.stream()
                     .map(line -> line.replaceAll(regex, replacement))
                     .collect(Collectors.toList());
-            writeFile(file, updated);
+            fileIO.writeFile(file, updated);
         }
     }
 }

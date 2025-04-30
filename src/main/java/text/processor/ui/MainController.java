@@ -15,10 +15,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import text.processor.TextProcessor;
+import text.processor.service.FileIO;
 
 public class MainController {
 
     private final TextProcessor processor = new TextProcessor();
+    private final FileIO fileIO = new FileIO();
     private final TextArea inputArea = new TextArea();
     private final TextArea resultArea = new TextArea();
     private final TextField regexField = new TextField();
@@ -70,7 +72,7 @@ public class MainController {
         currentFile = fileChooser.showOpenDialog(null);
         if (currentFile != null) {
             try {
-                List<String> lines = processor.readFile(currentFile);
+                List<String> lines = fileIO.readFile(currentFile);
                 inputArea.setText(String.join("\n", lines));
             } catch (IOException ex) {
                 showError("Failed to read file: " + ex.getMessage());
@@ -82,7 +84,7 @@ public class MainController {
         if (currentFile != null) {
             try {
                 List<String> lines = List.of(inputArea.getText().split("\n"));
-                processor.writeFile(currentFile, lines);
+                fileIO.writeFile(currentFile, lines);
                 showInfo("File saved successfully.");
             } catch (IOException ex) {
                 showError("Failed to write file: " + ex.getMessage());
