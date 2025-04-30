@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
@@ -19,6 +21,8 @@ import text.processor.service.FileIO;
 import text.processor.service.Regex;
 
 public class MainController {
+
+    private static final Logger logger = Logger.getLogger(MainController.class.getName());
 
     private final TextProcessor processor = new TextProcessor();
     private final FileIO fileIO = new FileIO();
@@ -78,7 +82,9 @@ public class MainController {
             try {
                 List<String> lines = fileIO.readFile(currentFile);
                 inputArea.setText(String.join("\n", lines));
+                logger.info("File loaded: " + currentFile.getAbsolutePath());
             } catch (IOException ex) {
+                logger.log(Level.SEVERE, "Error loading file", ex);
                 showError("Failed to read file: " + ex.getMessage());
             }
         }
@@ -89,8 +95,10 @@ public class MainController {
             try {
                 List<String> lines = List.of(inputArea.getText().split("\n"));
                 fileIO.writeFile(currentFile, lines);
+                logger.info("File saved: " + currentFile.getAbsolutePath());
                 showInfo("File saved successfully.");
             } catch (IOException ex) {
+                logger.log(Level.SEVERE, "Error saving file", ex);
                 showError("Failed to write file: " + ex.getMessage());
             }
         } else {
@@ -99,37 +107,67 @@ public class MainController {
     }
 
     private void findMatches() {
-        String input = inputArea.getText();
-        String regex = regexField.getText();
-        List<String> matches = regexService.findMatches(input, regex);
-        resultArea.setText(String.join("\n", matches));
+        try {
+            String input = inputArea.getText();
+            String regex = regexField.getText();
+            List<String> matches = regexService.findMatches(input, regex);
+            resultArea.setText(String.join("\n", matches));
+            logger.info("Regex match performed with pattern: " + regex);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error during regex match", e);
+            showError("Error during matching: " + e.getMessage());
+        }
     }
 
     private void replaceText() {
-        String input = inputArea.getText();
-        String regex = regexField.getText();
-        String replacement = replacementField.getText();
-        String replaced = regexService.replaceMatches(input, regex, replacement);
-        resultArea.setText(replaced);
+        try {
+            String input = inputArea.getText();
+            String regex = regexField.getText();
+            String replacement = replacementField.getText();
+            String replaced = regexService.replaceMatches(input, regex, replacement);
+            resultArea.setText(replaced);
+            logger.info("Text replaced using pattern: " + regex);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error during text replacement", e);
+            showError("Error during replacement: " + e.getMessage());
+        }
     }
 
     private void highlightMatches() {
-        String input = inputArea.getText();
-        String regex = regexField.getText();
-        String highlighted = regexService.highlightMatches(input, regex);
-        resultArea.setText(highlighted);
+        try {
+            String input = inputArea.getText();
+            String regex = regexField.getText();
+            String highlighted = regexService.highlightMatches(input, regex);
+            resultArea.setText(highlighted);
+            logger.info("Highlight applied with regex: " + regex);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error during highlight", e);
+            showError("Error during highlighting: " + e.getMessage());
+        }
     }
 
     private void showFrequency() {
-        String input = inputArea.getText();
-        Map<String, Long> frequency = processor.wordFrequency(input);
-        resultArea.setText(frequency.toString());
+        try {
+            String input = inputArea.getText();
+            Map<String, Long> frequency = processor.wordFrequency(input);
+            resultArea.setText(frequency.toString());
+            logger.info("Word frequency analysis complete.");
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error during frequency analysis", e);
+            showError("Error during word frequency analysis: " + e.getMessage());
+        }
     }
 
     private void summarize() {
-        String input = inputArea.getText();
-        Map<String, Integer> summary = processor.summarizeText(input);
-        resultArea.setText(summary.toString());
+        try {
+            String input = inputArea.getText();
+            Map<String, Integer> summary = processor.summarizeText(input);
+            resultArea.setText(summary.toString());
+            logger.info("Text summarization complete.");
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error during summarization", e);
+            showError("Error during summarization: " + e.getMessage());
+        }
     }
 
     private void showError(String message) {
