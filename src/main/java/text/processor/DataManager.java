@@ -13,19 +13,8 @@ public class DataManager {
         entries.put(entry.getId(), entry);
     }
 
-    public void updateEntry(String id, String newContent) {
-        TextEntry entry = entries.get(id);
-        if (entry != null) {
-            entry.setContent(newContent);
-        }
-    }
-
     public void deleteEntry(String id) {
         entries.remove(id);
-    }
-
-    public TextEntry getEntry(String id) {
-        return entries.get(id);
     }
 
     public Collection<TextEntry> getAllEntries() {
