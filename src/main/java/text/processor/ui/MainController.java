@@ -2,8 +2,11 @@ package text.processor.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,17 +24,15 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import text.processor.DataManager;
 import text.processor.TextProcessor;
 import text.processor.service.FileIO;
 import text.processor.service.Regex;
-import text.processor.service.TextEntry;
 
 public class MainController {
 
     private final TextProcessor processor = new TextProcessor();
-    private final FileIO fileIO = new FileIO();
     private final Regex regexService = new Regex();
+    private final FileIO fileIO = new FileIO();
     private final DataManager dataManager = new DataManager();
     private final Logger logger = Logger.getLogger(MainController.class.getName());
 
@@ -55,8 +56,9 @@ public class MainController {
         Button summaryButton = new Button("Summarize");
         Button addEntryButton = new Button("Add Entry");
         Button deleteEntryButton = new Button("Delete Entry");
+        Button loadEntryButton = new Button("Load Entry");
 
-        HBox topPanel = new HBox(10, loadButton, saveButton, matchButton, replaceButton, freqButton, summaryButton, addEntryButton, deleteEntryButton);
+        HBox topPanel = new HBox(10, loadButton, saveButton, matchButton, replaceButton, freqButton, summaryButton, addEntryButton, deleteEntryButton, loadEntryButton);
         HBox inputPanel = new HBox(10, regexField, replacementField);
 
         regexField.setPromptText("Enter regex");
@@ -69,8 +71,6 @@ public class MainController {
 
         VBox entryPanel = new VBox(new Label("Text Entries:"), entryList);
         entryPanel.setSpacing(5);
-        entryPanel.setPrefWidth(300);
-        entryPanel.setPrefHeight(150);
 
         root.getChildren().addAll(topPanel, inputPanel, entryPanel,
                 new Label("Input:"), inputArea,
@@ -85,6 +85,7 @@ public class MainController {
         summaryButton.setOnAction(e -> summarize());
         addEntryButton.setOnAction(e -> addEntry());
         deleteEntryButton.setOnAction(e -> deleteEntry());
+        loadEntryButton.setOnAction(e -> loadEntry());
 
         return root;
     }
@@ -203,6 +204,16 @@ public class MainController {
         }
     }
 
+    private void loadEntry() {
+        TextEntry selected = entryList.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            inputArea.setText(selected.getContent());
+            logger.info("Entry loaded into input area.");
+        } else {
+            showError("No entry selected to load.");
+        }
+    }
+
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR, message);
         alert.showAndWait();
@@ -211,5 +222,72 @@ public class MainController {
     private void showInfo(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
         alert.showAndWait();
+    }
+
+    // Inner class: TextEntry
+    public static class TextEntry {
+        private String id;
+        private String content;
+
+        public TextEntry(String id, String content) {
+            this.id = id;
+            this.content = content;
+        }
+
+        public TextEntry(String content) {
+            this.id = String.valueOf(content.hashCode());
+            this.content = content;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public void setContent(String content) {
+            this.content = content;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof TextEntry)) return false;
+            TextEntry that = (TextEntry) o;
+            return Objects.equals(id, that.id);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id);
+        }
+
+        @Override
+        public String toString() {
+            return id + ": " + content;
+        }
+    }
+
+    // Inner class: DataManager
+    public static class DataManager {
+        private final Map<String, TextEntry> entries = new HashMap<>();
+
+        public void addEntry(TextEntry entry) {
+            entries.put(entry.getId(), entry);
+        }
+
+        public void deleteEntry(String id) {
+            entries.remove(id);
+        }
+
+        public Collection<TextEntry> getAllEntries() {
+            return entries.values();
+        }
     }
 }
