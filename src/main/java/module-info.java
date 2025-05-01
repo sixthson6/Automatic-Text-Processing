@@ -7,4 +7,6 @@ module text.processor {
  
     opens text.processor to javafx.fxml;
     exports text.processor;
+    exports text.processor.ui;
+    exports text.processor.service;
 }
