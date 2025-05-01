@@ -7,102 +7,125 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import text.processor.DataManager;
 import text.processor.TextProcessor;
 import text.processor.service.FileIO;
 import text.processor.service.Regex;
+import text.processor.service.TextEntry;
 
 public class MainController {
-
-    private static final Logger logger = Logger.getLogger(MainController.class.getName());
 
     private final TextProcessor processor = new TextProcessor();
     private final FileIO fileIO = new FileIO();
     private final Regex regexService = new Regex();
+    private final DataManager dataManager = new DataManager();
+    private final Logger logger = Logger.getLogger(MainController.class.getName());
+
     private final TextArea inputArea = new TextArea();
     private final TextArea resultArea = new TextArea();
     private final TextField regexField = new TextField();
     private final TextField replacementField = new TextField();
-    private final VBox root = new VBox();
+    private final ListView<TextEntry> entryList = new ListView<>();
+    private final TableView<String> matchTable = new TableView<>();
     private File currentFile;
 
-    public MainController() {
-        // Top panel
+    public VBox getRoot() {
+        VBox root = new VBox(10);
+        root.setPadding(new Insets(10));
+
         Button loadButton = new Button("Load File");
         Button saveButton = new Button("Save File");
         Button matchButton = new Button("Find Matches");
         Button replaceButton = new Button("Replace");
-        Button highlightButton = new Button("Highlight Matches");
         Button freqButton = new Button("Word Frequency");
         Button summaryButton = new Button("Summarize");
+        Button addEntryButton = new Button("Add Entry");
+        Button deleteEntryButton = new Button("Delete Entry");
 
-        HBox topPanel = new HBox(10, loadButton, saveButton, matchButton, replaceButton, highlightButton, freqButton, summaryButton);
-        topPanel.setPadding(new Insets(10));
+        HBox topPanel = new HBox(10, loadButton, saveButton, matchButton, replaceButton, freqButton, summaryButton, addEntryButton, deleteEntryButton);
+        HBox inputPanel = new HBox(10, regexField, replacementField);
 
-        // Input fields
         regexField.setPromptText("Enter regex");
         replacementField.setPromptText("Replacement text");
-        HBox inputPanel = new HBox(10, regexField, replacementField);
-        inputPanel.setPadding(new Insets(10));
 
-        // Text areas
         inputArea.setPromptText("Input text here or load a file...");
         resultArea.setPromptText("Results...");
 
-        root.setPadding(new Insets(10));
-        root.setSpacing(10);
-        root.getChildren().addAll(topPanel, inputPanel, new Label("Input:"), inputArea, new Label("Output:"), resultArea);
+        setupMatchTable();
 
-        // Button actions
+        VBox entryPanel = new VBox(new Label("Text Entries:"), entryList);
+        entryPanel.setSpacing(5);
+        entryPanel.setPrefWidth(300);
+        entryPanel.setPrefHeight(150);
+
+        root.getChildren().addAll(topPanel, inputPanel, entryPanel,
+                new Label("Input:"), inputArea,
+                new Label("Matches:"), matchTable,
+                new Label("Output:"), resultArea);
+
         loadButton.setOnAction(e -> loadFile());
         saveButton.setOnAction(e -> saveFile());
         matchButton.setOnAction(e -> findMatches());
         replaceButton.setOnAction(e -> replaceText());
-        highlightButton.setOnAction(e -> highlightMatches());
         freqButton.setOnAction(e -> showFrequency());
         summaryButton.setOnAction(e -> summarize());
-    }
+        addEntryButton.setOnAction(e -> addEntry());
+        deleteEntryButton.setOnAction(e -> deleteEntry());
 
-    public VBox getRoot() {
         return root;
     }
 
+    private void setupMatchTable() {
+        TableColumn<String, String> matchColumn = new TableColumn<>("Match");
+        matchColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue()));
+        matchColumn.setMinWidth(500);
+        matchTable.getColumns().add(matchColumn);
+        matchTable.setPlaceholder(new Label("No matches found"));
+        matchTable.setPrefHeight(200);
+    }
+
     private void loadFile() {
-        FileChooser fileChooser = new FileChooser();
-        currentFile = fileChooser.showOpenDialog(null);
-        if (currentFile != null) {
-            try {
+        try {
+            FileChooser fileChooser = new FileChooser();
+            currentFile = fileChooser.showOpenDialog(null);
+            if (currentFile != null) {
                 List<String> lines = fileIO.readFile(currentFile);
                 inputArea.setText(String.join("\n", lines));
-                logger.log(Level.INFO, "File loaded: {0}", currentFile.getAbsolutePath());
-            } catch (IOException ex) {
-                logger.log(Level.SEVERE, "Error loading file", ex);
-                showError("Failed to read file: " + ex.getMessage());
+                logger.log(Level.INFO, "File loaded: {0}", currentFile.getName());
             }
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "Error reading file", ex);
+            showError("Failed to read file: " + ex.getMessage());
         }
     }
 
     private void saveFile() {
-        if (currentFile != null) {
-            try {
+        try {
+            if (currentFile != null) {
                 List<String> lines = List.of(inputArea.getText().split("\n"));
                 fileIO.writeFile(currentFile, lines);
-                logger.log(Level.INFO, "File saved: {0}", currentFile.getAbsolutePath());
+                logger.info("File saved successfully");
                 showInfo("File saved successfully.");
-            } catch (IOException ex) {
-                logger.log(Level.SEVERE, "Error saving file", ex);
-                showError("Failed to write file: " + ex.getMessage());
+            } else {
+                showError("No file loaded.");
             }
-        } else {
-            showError("No file loaded.");
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "Error writing file", ex);
+            showError("Failed to write file: " + ex.getMessage());
         }
     }
 
@@ -111,7 +134,7 @@ public class MainController {
             String input = inputArea.getText();
             String regex = regexField.getText();
             List<String> matches = regexService.findMatches(input, regex);
-            resultArea.setText(String.join("\n", matches));
+            matchTable.setItems(FXCollections.observableArrayList(matches));
             logger.log(Level.INFO, "Regex match performed with pattern: {0}", regex);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error during regex match", e);
@@ -126,23 +149,10 @@ public class MainController {
             String replacement = replacementField.getText();
             String replaced = regexService.replaceMatches(input, regex, replacement);
             resultArea.setText(replaced);
-            logger.log(Level.INFO, "Text replaced using pattern: {0}", regex);
+            logger.info("Text replaced successfully.");
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error during text replacement", e);
-            showError("Error during replacement: " + e.getMessage());
-        }
-    }
-
-    private void highlightMatches() {
-        try {
-            String input = inputArea.getText();
-            String regex = regexField.getText();
-            String highlighted = regexService.highlightMatches(input, regex);
-            resultArea.setText(highlighted);
-            logger.log(Level.INFO, "Highlight applied with regex: {0}", regex);
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Error during highlight", e);
-            showError("Error during highlighting: " + e.getMessage());
+            logger.log(Level.SEVERE, "Replacement failed", e);
+            showError("Error during replace: " + e.getMessage());
         }
     }
 
@@ -151,10 +161,10 @@ public class MainController {
             String input = inputArea.getText();
             Map<String, Long> frequency = processor.wordFrequency(input);
             resultArea.setText(frequency.toString());
-            logger.info("Word frequency analysis complete.");
+            logger.info("Word frequency calculated");
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error during frequency analysis", e);
-            showError("Error during word frequency analysis: " + e.getMessage());
+            logger.log(Level.WARNING, "Frequency error", e);
+            showError("Error during frequency analysis: " + e.getMessage());
         }
     }
 
@@ -163,10 +173,33 @@ public class MainController {
             String input = inputArea.getText();
             Map<String, Integer> summary = processor.summarizeText(input);
             resultArea.setText(summary.toString());
-            logger.info("Text summarization complete.");
+            logger.info("Text summarized");
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error during summarization", e);
+            logger.log(Level.WARNING, "Summarize error", e);
             showError("Error during summarization: " + e.getMessage());
+        }
+    }
+
+    private void addEntry() {
+        String content = inputArea.getText();
+        if (!content.isBlank()) {
+            TextEntry newEntry = new TextEntry(content);
+            dataManager.addEntry(newEntry);
+            entryList.setItems(FXCollections.observableArrayList(dataManager.getAllEntries()));
+            logger.info("New entry added.");
+        } else {
+            showError("Input area is empty. Cannot add entry.");
+        }
+    }
+
+    private void deleteEntry() {
+        TextEntry selected = entryList.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            dataManager.deleteEntry(selected.getId());
+            entryList.setItems(FXCollections.observableArrayList(dataManager.getAllEntries()));
+            logger.info("Entry removed.");
+        } else {
+            showError("No entry selected for deletion.");
         }
     }
 
