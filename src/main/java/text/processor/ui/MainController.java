@@ -34,7 +34,7 @@ public class MainController {
     private final Regex regexService = new Regex();
     private final FileIO fileIO = new FileIO();
     private final DataManager dataManager = new DataManager();
-    private final Logger logger = Logger.getLogger(MainController.class.getName());
+    private static final Logger logger = Logger.getLogger(MainController.class.getName());
 
     private final TextArea inputArea = new TextArea();
     private final TextArea resultArea = new TextArea();
@@ -69,13 +69,24 @@ public class MainController {
 
         setupMatchTable();
 
-        VBox entryPanel = new VBox(new Label("Text Entries:"), entryList);
+        VBox entryPanel = new VBox(new Label("Entry Storage:"), entryList);
         entryPanel.setSpacing(5);
+        entryPanel.setPrefWidth(150);
+        entryList.setPrefHeight(900);
 
-        root.getChildren().addAll(topPanel, inputPanel, entryPanel,
-                new Label("Input:"), inputArea,
-                new Label("Matches:"), matchTable,
-                new Label("Output:"), resultArea);
+        VBox rightBox = new VBox(10, 
+                new Label("Input: "), inputArea, 
+                new Label("Output: "), resultArea, 
+                matchTable);
+
+        rightBox.setPrefWidth(600);
+
+        VBox lBox = new VBox(entryPanel);
+
+        HBox leftBox = new HBox(10, rightBox, lBox);
+        leftBox.setPrefHeight(900);
+
+        root.getChildren().addAll(topPanel, inputPanel, leftBox);
 
         loadButton.setOnAction(e -> loadFile());
         saveButton.setOnAction(e -> saveFile());
