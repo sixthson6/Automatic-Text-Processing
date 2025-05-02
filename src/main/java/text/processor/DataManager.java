@@ -9,8 +9,9 @@ import text.processor.service.TextEntry;
 public class DataManager {
     private final Map<String, TextEntry> entries = new HashMap<>();
 
-    public void addEntry(TextEntry entry) {
+    public String addEntry(TextEntry entry) {
         entries.put(entry.getId(), entry);
+        return entry.getId();
     }
 
     public void deleteEntry(String id) {
