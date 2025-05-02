@@ -8,7 +8,6 @@ import java.util.regex.PatternSyntaxException;
 
 public class Regex {
 
-    // Matches all occurrences of a regex pattern in the input text
     public List<String> findMatches(String input, String regex) {
         List<String> matches = new ArrayList<>();
         try {
@@ -23,7 +22,6 @@ public class Regex {
         return matches;
     }
 
-    // Replaces all occurrences matching the regex with the given replacement
     public String replaceMatches(String input, String regex, String replacement) {
         try {
             return input.replaceAll(regex, replacement);
@@ -32,7 +30,6 @@ public class Regex {
         }
     }
 
-    // Highlights (with markers) all matching parts — useful for visual debugging or preview
     public String highlightMatches(String input, String regex) {
         try {
             Pattern pattern = Pattern.compile(regex);
@@ -48,7 +45,6 @@ public class Regex {
         }
     }
 
-    // Validates whether a regex pattern is syntactically correct
     public boolean isValidRegex(String regex) {
         try {
             Pattern.compile(regex);

@@ -6,10 +6,10 @@ public class TextEntry {
     private String id;
     private String content;
 
-    public TextEntry(String id, String content) {
-        this.id = id;
-        this.content = content;
-    }
+    // public TextEntry(String id, String content) {
+    //     this.id = id;
+    //     this.content = content;
+    // }
 
     public TextEntry(String content) {
         this.id = String.valueOf(content.hashCode());
