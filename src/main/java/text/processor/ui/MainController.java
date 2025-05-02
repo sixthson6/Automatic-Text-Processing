@@ -125,15 +125,37 @@ public class MainController {
         }
     }
 
+    // private void saveFile() {
+    //     try {
+    //         if (currentFile != null) {
+    //             List<String> lines = List.of(inputArea.getText().split("\n"));
+    //             fileIO.writeFile(currentFile, lines);
+    //             logger.info("File saved successfully");
+    //             showInfo("File saved successfully.");
+    //         } else {
+    //             showError("No file loaded.");
+    //         }
+    //     } catch (IOException ex) {
+    //         logger.log(Level.SEVERE, "Error writing file", ex);
+    //         showError("Failed to write file: " + ex.getMessage());
+    //     }
+    // }
+
     private void saveFile() {
         try {
+            if (currentFile == null) {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Save File");
+                currentFile = fileChooser.showSaveDialog(null);
+            }
+    
             if (currentFile != null) {
                 List<String> lines = List.of(inputArea.getText().split("\n"));
                 fileIO.writeFile(currentFile, lines);
-                logger.info("File saved successfully");
+                logger.log(Level.INFO, "File saved successfully: {0}", currentFile.getName());
                 showInfo("File saved successfully.");
             } else {
-                showError("No file loaded.");
+                showError("No file selected for saving.");
             }
         } catch (IOException ex) {
             logger.log(Level.SEVERE, "Error writing file", ex);
